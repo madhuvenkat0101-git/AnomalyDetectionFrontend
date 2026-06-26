@@ -39,7 +39,6 @@ body {
   min-height: 100vh;
 }
 
-/* ─── Topbar ─────────────────────────────────────────────────── */
 .topbar {
   height: 54px;
   display: flex;
@@ -92,7 +91,6 @@ body {
   font-weight: 400;
 }
 
-/* ── Status pill ── */
 .conn-pill {
   display: flex;
   align-items: center;
@@ -235,7 +233,6 @@ body {
   text-overflow: ellipsis;
 }
 
-/* ─── Layout ─────────────────────────────────────────────────── */
 .layout {
   display: grid;
   grid-template-columns: 1fr 330px;
@@ -297,7 +294,6 @@ body {
   line-height: 1.6;
 }
 
-/* ─── Chart card ─────────────────────────────────────────────── */
 .chart-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -351,7 +347,6 @@ body {
   display: block;
 }
 
-/* ─── Sidebar ────────────────────────────────────────────────── */
 .sidebar {
   border-left: 1px solid var(--border);
   background: var(--surface);
@@ -415,7 +410,6 @@ body {
 .alert-list::-webkit-scrollbar { width: 4px; }
 .alert-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-/* ── Alert item ── */
 .alert-item {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -512,7 +506,6 @@ body {
   font-family: var(--mono);
 }
 
-/* ── Empty alerts ── */
 .alert-empty {
   display: flex;
   flex-direction: column;
