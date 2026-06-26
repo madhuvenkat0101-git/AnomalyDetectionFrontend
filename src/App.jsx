@@ -1,122 +1,89 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useRef, useState } from 'react';
+import socket from './socket';
+import { fetchRecentAlerts } from './api';
+import PriceChart from './components/PriceChart';
+import AlertFeed from './components/AlertFeed';
+import ConnectionBar from './components/ConnectionBar';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [connected, setConnected] = useState(socket.connected);
+  const [symbols,   setSymbols]   = useState([]);
+  const [alerts,    setAlerts]    = useState([]);
+  const [apiKey,    setApiKey]    = useState(
+    () => localStorage.getItem('apiKey') || import.meta.env.VITE_API_KEY || ''
+  );
+  const [error, setError] = useState('');
+  const seen = useRef(new Set());
+
+  useEffect(() => {
+    const onConnect    = () => setConnected(true);
+    const onDisconnect = () => setConnected(false);
+    socket.on('connect',    onConnect);
+    socket.on('disconnect', onDisconnect);
+    return () => {
+      socket.off('connect',    onConnect);
+      socket.off('disconnect', onDisconnect);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onTick = (t) => {
+      if (/-SIM\d+$/.test(t.symbol)) return;
+      if (!seen.current.has(t.symbol)) {
+        seen.current.add(t.symbol);
+        setSymbols(Array.from(seen.current).sort());
+      }
+    };
+    socket.on('tick', onTick);
+    return () => socket.off('tick', onTick);
+  }, []);
+
+  useEffect(() => {
+    const onAlert = (a) => setAlerts((prev) => [a, ...prev].slice(0, 50));
+    socket.on('alert', onAlert);
+    return () => socket.off('alert', onAlert);
+  }, []);
+
+  const loadRecent = async () => {
+    setError('');
+    localStorage.setItem('apiKey', apiKey);
+    try {
+      const recent = await fetchRecentAlerts(apiKey, 10);
+      setAlerts(recent);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <ConnectionBar
+        connected={connected}
+        apiKey={apiKey}
+        setApiKey={setApiKey}
+        onReload={loadRecent}
+        error={error}
+      />
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      <div className="layout">
+        <div className="charts-area">
+          {symbols.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">⬡</div>
+              <h3>No symbols yet</h3>
+              <p>Charts appear automatically as price ticks come in from the service.</p>
+            </div>
+          ) : (
+            <div className="charts-grid">
+              {symbols.map((s) => (
+                <PriceChart key={s} symbol={s} />
+              ))}
+            </div>
+          )}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <AlertFeed alerts={alerts} />
+      </div>
+    </div>
+  );
 }
-
-export default App
