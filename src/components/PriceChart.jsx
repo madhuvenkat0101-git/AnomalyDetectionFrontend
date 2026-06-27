@@ -11,33 +11,33 @@ export default function PriceChart({ symbol }) {
       height: 200,
       layout: {
         background: { color: 'transparent' },
-        textColor: '#6e7590',
-        fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+        textColor: '#9c9180',
+        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: '#1e2230' },
-        horzLines: { color: '#1e2230' },
+        vertLines: { color: '#241f17' },
+        horzLines: { color: '#241f17' },
       },
       timeScale: {
         timeVisible: true,
         secondsVisible: true,
-        borderColor: '#2a2e3d',
+        borderColor: '#332c22',
         tickMarkFormatter: (t) => {
           const d = new Date(t * 1000);
           return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         },
       },
-      rightPriceScale: { borderColor: '#2a2e3d' },
+      rightPriceScale: { borderColor: '#332c22' },
       crosshair: { mode: 1 },
       handleScroll: false,
       handleScale: false,
     });
 
     const series = chart.addSeries(AreaSeries, {
-      lineColor:   '#3ecf8e',
-      topColor:    'rgba(62,207,142,0.15)',
-      bottomColor: 'rgba(62,207,142,0.0)',
+      lineColor:   '#e3a44a',
+      topColor:    'rgba(227,164,74,0.18)',
+      bottomColor: 'rgba(227,164,74,0.0)',
       lineWidth: 1.5,
       priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
     });

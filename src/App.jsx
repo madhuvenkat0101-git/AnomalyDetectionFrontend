@@ -4,6 +4,7 @@ import { fetchRecentAlerts } from './api';
 import PriceChart from './components/PriceChart';
 import AlertFeed from './components/AlertFeed';
 import ConnectionBar from './components/ConnectionBar';
+import TickerTape from './components/TickerTape';
 
 export default function App() {
   const [connected, setConnected] = useState(socket.connected);
@@ -57,6 +58,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <TickerTape />
       <ConnectionBar
         connected={connected}
         apiKey={apiKey}
